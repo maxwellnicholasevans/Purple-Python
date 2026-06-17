@@ -180,22 +180,25 @@ while running:
         if not is_shooting:
             beam_rect = pygame.Rect(0, 0, 0, 0)
         if enemy1_pos.colliderect(beam_rect) or enemy1_pos.colliderect(energy_blast_hitbox_pos) or enemy1_pos.colliderect(energy_blast1_hitbox_pos) or enemy1_pos.colliderect(energy_blast1_hitbox_pos):
-            enemy1_pos.x = 1000
-            enemy1_pos.y = random.randint(31, screen.get_height() - 31)
-            death_frames_2 = 15
+            if secret_frames < 1:
+                enemy1_pos.x = 1000
+                enemy1_pos.y = random.randint(31, screen.get_height() - 31)
+                death_frames_2 = 15
         if enemy2_pos.colliderect(beam_rect) or enemy2_pos.colliderect(energy_blast_hitbox_pos) or enemy2_pos.colliderect(energy_blast1_hitbox_pos) or enemy2_pos.colliderect(energy_blast2_hitbox_pos):
-            enemy2_pos.x = 1000
-            enemy2_pos.y = random.randint(31, screen.get_height() - 31)
-            death_frames_2 = 15
+            if secret_frames < 1:
+                enemy2_pos.x = 1000
+                enemy2_pos.y = random.randint(31, screen.get_height() - 31)
+                death_frames_2 = 15
         if enemy_pos.x < 0 or enemy1_pos.x < 0 or enemy2_pos.x < 0:
             winner = -1
         if enemy_pos.colliderect(beam_rect) or enemy_pos.colliderect(energy_blast_hitbox_pos) or enemy_pos.colliderect(energy_blast1_hitbox_pos) or enemy_pos.colliderect(energy_blast2_hitbox_pos):
-            enemy_pos.x = 1000
-            enemy_pos.y = random.randint(0, screen.get_height())
-            enemy_lives = enemy_lives - 1
-            death_frames = 15
-            enemy2_pos.x = 1000
-            secret_frames_used = False
+            if secret_frames < 1:
+                enemy_pos.x = 1000
+                enemy_pos.y = random.randint(0, screen.get_height())
+                enemy_lives = enemy_lives - 1
+                death_frames = 15
+                enemy2_pos.x = 1000
+                secret_frames_used = False
             if enemy_lives < 1:
                 winner = 1
         if enemy_pos.x < 0:
