@@ -1,7 +1,6 @@
 # Example file showing a circle moving on screen
 import pygame
 import random
-import time
 
 
 # pygame setup
@@ -23,7 +22,7 @@ enemy_lives = 5
 enemy_max_lives = 5
 winner = 0
 Raider_vertical = 1
-Raider_horizontal = 1
+Raider_horizontal = 1 
 guardian_speed = 1
 charge_speed = 1
 death_frames = 0
@@ -33,7 +32,8 @@ death_frames_2 = 0
 sleep = 1
 
 raider1immage = pygame.image.load("raider_balloon.png")
-
+guardianimmage = pygame.image.load("guardian.png")
+RaiderUFO = pygame.image.load("RaiderUFO.png")
 
 def draw_energy_bar():                               
     energyBarHeight = (energy) /max_energy   * screen.get_height()
@@ -49,15 +49,15 @@ def draw_energy_bar():
     # dark green
 def draw_entities():
     global secret_frames
-    pygame.draw.circle(screen, pygame.Color(128,255,0), player_pos, 40)
     if secret_frames > 0:
         pygame.draw.rect(screen, pygame.Color(127, 0, 255), pygame.Rect(enemy_pos.x, enemy_pos.y, 200, enemy_pos.h))
         secret_frames -= 1
     else:
         #pygame.draw.rect(screen, pygame.Color(127, 0, 255), enemy_pos)
-        screen.blit(raider1immage,enemy_pos)
-    pygame.draw.rect(screen, pygame.Color(255, 200, 60), enemy1_pos)
-    pygame.draw.rect(screen, pygame.Color(255, 200, 60), enemy2_pos)
+        screen.blit(RaiderUFO,enemy_pos)
+    screen.blit(guardianimmage, player_pos - pygame.Vector2(100, 40))
+    screen.blit(raider1immage,enemy1_pos)
+    screen.blit(raider1immage,enemy2_pos)
     pygame.draw.rect(screen, pygame.Color("white"), beam_prepare, 5)
 
 while running:
@@ -92,10 +92,10 @@ while running:
         if enemy_pos.y + enemy_pos.h > screen.get_height():
             enemy_pos.y = 31
             
-        if player_pos.y + player_pos.x < 0:
-            player_pos.y = screen.get_height()
-        if player_pos.y > screen.get_height():
-            player_pos.y = 0
+        if player_pos.y  < 30:
+            player_pos.y = screen.get_height() - 31
+        if player_pos.y +30 > screen.get_height():
+            player_pos.y = 31
             
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -106,9 +106,9 @@ while running:
                 secret_tunnel = 0
                 secret_frames = 15
         if keys[pygame.K_UP]:
-            enemy_pos.y -= 500 * dt * Raider_vertical
+            enemy_pos.y -= 400 * dt * Raider_vertical
         if keys[pygame.K_DOWN]:
-                enemy_pos.y += 500 * dt * Raider_vertical 
+                enemy_pos.y += 400 * dt * Raider_vertical 
         if keys[pygame.K_RIGHT]:
             enemy_pos.x += 100 * dt * Raider_vertical 
         if keys[pygame.K_w]:
