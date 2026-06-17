@@ -16,12 +16,13 @@ player_pos = pygame.Vector2(screen.get_width() / 5 , screen.get_height() / 2)
 enemy_pos = pygame.Rect(screen.get_width(), random.randint (0, screen.get_height()), 30 , 30)
 enemy1_pos = pygame.Rect(screen.get_width() - 30, random.randint (0, screen.get_height()), 30, 30)
 enemy2_pos = pygame.Rect(screen.get_width() - 30, random.randint (0, screen.get_height()), 30, 30)
-energy_blast_pos = pygame.Vector2(0,2000)
+energy_blast_pos = pygame.Vector2(0,2000) 
 energy_blast1_pos = pygame.Vector2(0,2000)
 energy_blast2_pos = pygame.Vector2(0,2000)
 energy_blast_hitbox_pos = pygame.Rect(energy_blast_pos.x,energy_blast_pos.y , 30, 30)
 energy_blast1_hitbox_pos = pygame.Rect(energy_blast1_pos.x,energy_blast1_pos.y , 30, 30)
-energy_blast1_hitbox_pos = pygame.Rect(energy_blast2_pos.x,energy_blast2_pos.y , 30, 30)
+energy_blast2_hitbox_pos = pygame.Rect(energy_blast2_pos.x,energy_blast2_pos.y , 30, 30)
+energy_blast_cd_indicator_pos = pygame.Rect(100, 100 , 60, 60)
 is_shooting = False
 beam_rect = pygame.Rect(player_pos.x, player_pos.y, 1280, 40)
 enemy_lives = 5
@@ -35,7 +36,8 @@ death_frames = 0
 secret_frames = 0
 secret_frames_used = False
 death_frames_2 = 0
-
+energy_blast_cd = 0
+game_font = pygame.font.Font(None, 50)
 
 raider1immage = pygame.image.load("raider_balloon.png")
 guardianimmage = pygame.image.load("guardian.png")
@@ -53,13 +55,20 @@ def draw_energy_bar():
             pygame.draw.rect(screen, (128, 255, 0), pygame.Rect(0 , screen.get_height() - (100 * i /max_energy * screen.get_height() ) , 60 , 10  ))
     enemyLivesBarHeight = screen.get_height() * (enemy_lives / enemy_max_lives)
     pygame.draw.rect(screen, pygame.Color(127, 0, 255), pygame.Rect(screen.get_width() -  40, screen.get_height() - enemyLivesBarHeight, 40, enemyLivesBarHeight))
+    if energy_blast_cd < 0:
+        pygame.draw.rect(screen, (128, 255, 0),pygame.Rect(100,100,60,60))
+        text_surface = game_font.render("energy blast charged", True, (128, 255, 0))
+    else:
+        pygame.draw.rect(screen, ("white"), pygame.Rect(100,100,60,60))
+        text_surface = game_font.render("energy blast charging...", True, ("white"))
+    screen.blit(text_surface,(70,50))
     # dark green
 def draw_entities():
     global secret_frames
     if secret_frames > 0:
         pygame.draw.rect(screen, pygame.Color(127, 0, 255), pygame.Rect(enemy_pos.x, enemy_pos.y, 200, enemy_pos.h))
-        pygame.draw.rect(screen, pygame.Color(127, 0, 255), pygame.Rect(enemy1_pos.x, enemy1_pos.y, 100, enemy_pos.h))
-        pygame.draw.rect(screen, pygame.Color(127, 0, 255), pygame.Rect(enemy2_pos.x, enemy2_pos.y, 100, enemy_pos.h))
+        pygame.draw.rect(screen, pygame.Color(127, 0, 255), pygame.Rect(enemy1_pos.x, enemy1_pos.y, 200, enemy_pos.h))
+        pygame.draw.rect(screen, pygame.Color(127, 0, 255), pygame.Rect(enemy2_pos.x, enemy2_pos.y, 200, enemy_pos.h))
         secret_frames -= 1
     else:
         #pygame.draw.rect(screen, pygame.Color(127, 0, 255), enemy_pos)
@@ -73,12 +82,11 @@ def draw_entities():
 
     energy_blast_hitbox_pos.x = energy_blast_pos.x
     energy_blast_hitbox_pos.y = energy_blast_pos.y
-    energy_blast1_hitbox_pos.x = energy_blast_pos.x
-    energy_blast1_hitbox_pos.y = energy_blast_pos.y
-    energy_blast2_hitbox_pos.x = energy_blast_pos.x
-    energy_blast2_hitbox_pos.y = energy_blast_pos.y
+    energy_blast1_hitbox_pos.x = energy_blast1_pos.x
+    energy_blast1_hitbox_pos.y = energy_blast1_pos.y
+    energy_blast2_hitbox_pos.x = energy_blast2_pos.x
+    energy_blast2_hitbox_pos.y = energy_blast2_pos.y
     pygame.draw.rect(screen, pygame.Color("white"), beam_prepare, 5)
-    pygame.draw.rect(screen, pygame.Color("white"), energy_blast_hitbox_pos)
 
 while running:
     energy_blast_hitbox_pos.x = energy_blast_pos.x
@@ -86,7 +94,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
     if winner == 0:
         if death_frames > 7 :
                screen.fill("white")
@@ -105,27 +112,29 @@ while running:
 
     if winner == 0 :
         beam_prepare = pygame.Rect(player_pos.x, player_pos.y - 20 , 1280, 40)
+        draw_energy_bar()
         draw_entities()
         enemy_pos.x = enemy_pos.x - 100 * dt * Raider_horizontal
-        enemy1_pos.x = enemy1_pos.x - 50 * dt * Raider_horizontal
-        enemy2_pos.x = enemy2_pos.x - 50 * dt * Raider_horizontal
+        enemy1_pos.x = enemy1_pos.x - 75 * dt * Raider_horizontal
+        enemy2_pos.x = enemy2_pos.x - 75 * dt * Raider_horizontal
         if enemy_pos.y - enemy_pos.h < 0:
             enemy_pos.y = screen.get_height() - 31
         if enemy_pos.y + enemy_pos.h > screen.get_height():
             enemy_pos.y = 31
-            
+        energy_blast_pos.x += 200 * dt
+        energy_blast1_pos.x += 200 * dt
+        energy_blast2_pos.x += 200 * dt
         if player_pos.y  < 30:
             player_pos.y = screen.get_height() - 31
         if player_pos.y +30 > screen.get_height():
-            player_pos.y = 31
-            
+            player_pos.y = 31   
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             if not secret_frames_used:
                 secret_frames_used = True
                 enemy_pos.x -= 200
-                enemy1_pos.x -= 150
-                enemy2_pos.x -= 150
+                enemy1_pos.x -= 200
+                enemy2_pos.x -= 200
                 enemy_pos.y = random.randint(0, screen.get_height())
                 secret_tunnel = 0
                 secret_frames = 15
@@ -158,28 +167,29 @@ while running:
                 is_shooting = False
         else:
             is_shooting = False
-        if keys[pygame.K_d]:
+        if keys[pygame.K_d] and energy_blast_cd < 0:
             energy_blast_pos.x = screen.get_width() / 5
             energy_blast_pos.y = enemy_pos.y
             energy_blast1_pos.x = screen.get_width() / 5
             energy_blast1_pos.y = enemy1_pos.y
             energy_blast2_pos.x = screen.get_width() / 5
             energy_blast2_pos.y = enemy2_pos.y
+            energy_blast_cd = 300
         if is_shooting == False and energy <= 1000:
             energy = energy + 10 * charge_speed
         if not is_shooting:
             beam_rect = pygame.Rect(0, 0, 0, 0)
-        if enemy1_pos.colliderect(beam_rect) or enemy1_pos.colliderect(energy_blast_hitbox_pos):
+        if enemy1_pos.colliderect(beam_rect) or enemy1_pos.colliderect(energy_blast_hitbox_pos) or enemy1_pos.colliderect(energy_blast1_hitbox_pos) or enemy1_pos.colliderect(energy_blast1_hitbox_pos):
             enemy1_pos.x = 1000
             enemy1_pos.y = random.randint(31, screen.get_height() - 31)
             death_frames_2 = 15
-        if enemy2_pos.colliderect(beam_rect) or enemy2_pos.colliderect(energy_blast_hitbox_pos):
+        if enemy2_pos.colliderect(beam_rect) or enemy2_pos.colliderect(energy_blast_hitbox_pos) or enemy2_pos.colliderect(energy_blast1_hitbox_pos) or enemy2_pos.colliderect(energy_blast2_hitbox_pos):
             enemy2_pos.x = 1000
             enemy2_pos.y = random.randint(31, screen.get_height() - 31)
             death_frames_2 = 15
         if enemy_pos.x < 0 or enemy1_pos.x < 0 or enemy2_pos.x < 0:
             winner = -1
-        if enemy_pos.colliderect(beam_rect) or enemy_pos.colliderect(energy_blast_hitbox_pos):
+        if enemy_pos.colliderect(beam_rect) or enemy_pos.colliderect(energy_blast_hitbox_pos) or enemy_pos.colliderect(energy_blast1_hitbox_pos) or enemy_pos.colliderect(energy_blast2_hitbox_pos):
             enemy_pos.x = 1000
             enemy_pos.y = random.randint(0, screen.get_height())
             enemy_lives = enemy_lives - 1
@@ -191,8 +201,8 @@ while running:
         if enemy_pos.x < 0:
             winner = -1
         death_frames_2 -= 1
-        draw_energy_bar()
     death_frames = death_frames - 1
+    energy_blast_cd -= 1
     pygame.display.flip()
 
     dt = clock.tick(60) / 1000
